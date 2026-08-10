@@ -1,5 +1,26 @@
 @import "tailwindcss";
 
-@theme{
-  
+@theme {
+  /* Light Mode Base */
+  --color-bg-main: #f8fafc;         /* Clean slate white background */
+  --color-bg-surface: #ffffff;      /* Pure white for cards & panels */
+  --color-bg-muted: #f1f5f9;        /* Soft gray for borders, tags & hover fills */
+
+  /* Iconic Pokémon Red Accents */
+  --color-accent: #ee1515;          /* Classic Pokeball Red */
+  --color-accent-hover: #c40d0d;    /* Deep Red for button hovers */
+  --color-accent-subtle: #fef2f2;   /* Soft red tint for active states / badge backgrounds */
+
+  /* Text Colors */
+  --color-text-main: #0f172a;       /* Dark slate for crisp titles & headings */
+  --color-text-subtle: #475569;     /* Slate gray for body copy */
+  --color-text-muted: #94a3b8;      /* Light gray for captions & secondary info */
+
+  /* Borders */
+  --color-border-main: #e2e8f0;     /* Subtle light gray border for cards */
+
+  /* Fonts */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Unbounded', 'Montserrat', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
