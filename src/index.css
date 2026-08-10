@@ -2,25 +2,30 @@
 
 @theme {
   /* Light Mode Base */
-  --color-bg-main: #f8fafc;         /* Clean slate white background */
-  --color-bg-surface: #ffffff;      /* Pure white for cards & panels */
-  --color-bg-muted: #f1f5f9;        /* Soft gray for borders, tags & hover fills */
+  --color-bg-main: #f8fafc;         /* Slate 50 background */
+  --color-bg-surface: #ffffff;      /* White cards & panels */
+  --color-bg-muted: #f1f5f9;        /* Slate 100 hover fills & borders */
 
-  /* Iconic Pokémon Red Accents */
-  --color-accent: #ee1515;          /* Classic Pokeball Red */
-  --color-accent-hover: #c40d0d;    /* Deep Red for button hovers */
-  --color-accent-subtle: #fef2f2;   /* Soft red tint for active states / badge backgrounds */
+  /* Primary Accent - Tailored to Rose 700 */
+  --color-accent: #be123c;          /* Rose 700 main brand color */
+  --color-accent-hover: #9f1239;    /* Rose 800 hover state */
+  --color-accent-subtle: #fff1f2;   /* Rose 50 soft badge/tab background */
+  --color-accent-muted: #fecdd3;    /* Rose 200 light border/chip highlight */
 
-  /* Text Colors */
-  --color-text-main: #0f172a;       /* Dark slate for crisp titles & headings */
-  --color-text-subtle: #475569;     /* Slate gray for body copy */
-  --color-text-muted: #94a3b8;      /* Light gray for captions & secondary info */
+  /* Sidebar Specific Tokens */
+  --color-sidebar-bg: #be123c;
+  --color-sidebar-text: #ffffff;
+  --color-sidebar-hover: #9f1239;
 
-  /* Borders */
-  --color-border-main: #e2e8f0;     /* Subtle light gray border for cards */
+  /* Typography & Borders */
+  --color-text-main: #0f172a;       /* Slate 900 headings */
+  --color-text-subtle: #475569;     /* Slate 600 body copy */
+  --color-text-muted: #94a3b8;      /* Slate 400 captions */
+  --color-border-main: #e2e8f0;     /* Slate 200 subtle borders */
 
   /* Fonts */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-display: 'Unbounded', 'Montserrat', sans-serif;
+  --font-pixel: 'Press Start 2P', cursive, sans-serif; /* Added Pixelify Sans */
   --font-mono: 'JetBrains Mono', monospace;
 }
