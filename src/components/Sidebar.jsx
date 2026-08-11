@@ -1,20 +1,21 @@
 import React from "react";
 import { TbPokeball } from "react-icons/tb";
 import { navLinks } from "../data/navLinks";
+import pokeball from "../assets/icons/pokeball.svg"
 
 export default function Sidebar() {
   return (
-    <aside className="fixed top-0 left-0 h-screen w-16 lg:w-64 bg-sidebar-bg border-r border-border-main hidden md:flex flex-col justify-between transition-all duration-300 z-50 shadow-sm">
+    <aside className="fixed top-0 left-0 h-screen w-16 lg:w-64 bg-sidebar-bg  hidden md:flex flex-col justify-between transition-all duration-300 z-50">
       
       {/* TOP CONTAINER */}
       <div className="flex flex-col items-center lg:items-start w-full">
         
         {/* BRAND LOGO HEADER (Matches Topbar Height h-16 & Red Color) */}
-        <div className="h-16 w-full bg-sidebar-header flex items-center justify-center lg:justify-start px-4 lg:px-6 shrink-0">
+        <div className="h-16 w-full bg-sidebar-header flex items-center justify-center px-4 shrink-0">
           
           {/* Expanded Desktop View */}
           <h1 className="font-pixel text-lg font-bold tracking-wider hidden lg:flex items-center gap-2 text-white">
-            <TbPokeball className="text-2xl text-white animate-spin-slow" />
+            <img src={pokeball} className="w-8 h-8" alt="" />
             <span>Dex<span className="text-slate-900">API</span></span>
           </h1>
 

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Sidebar from './components/Sidebar';
+import Header from './components/Header';
 import './App.css'
 
 export default function App() {
@@ -10,6 +11,7 @@ export default function App() {
       {/* Main Content */}
       <main className='flex-1 min-w-0 flex flex-col min-h-screen'>
         {/* Top Header */}
+        <Header />
       </main>
     </div>
   );
