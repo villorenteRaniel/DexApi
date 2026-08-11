@@ -12,10 +12,14 @@
   --color-accent-subtle: #fff1f2;   /* Rose 50 soft badge/tab background */
   --color-accent-muted: #fecdd3;    /* Rose 200 light border/chip highlight */
 
-  /* Sidebar Specific Tokens */
-  --color-sidebar-bg: #be123c;
-  --color-sidebar-text: #ffffff;
-  --color-sidebar-hover: #9f1239;
+  /* Sidebar Tokens (Light Mode Nifty Dashboard Style) */
+  --color-sidebar-bg: #ffffff;             /* Pure white body */
+  --color-sidebar-header: #be123c;         /* Rose 700 logo block header */
+  --color-sidebar-text: #475569;           /* Slate 600 for default nav links */
+  --color-sidebar-hover-bg: #f8fafc;       /* Slate 50 row hover background */
+  --color-sidebar-hover-text: #0f172a;     /* Slate 900 active text */
+  --color-sidebar-active-bg: #fff1f2;      /* Soft Rose 50 pill background for active link */
+  --color-sidebar-active-text: #be123c;    /* Rose 700 active text & icon color */
 
   /* Typography & Borders */
   --color-text-main: #0f172a;       /* Slate 900 headings */
@@ -26,6 +30,6 @@
   /* Fonts */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-display: 'Unbounded', 'Montserrat', sans-serif;
-  --font-pixel: 'Press Start 2P', cursive, sans-serif; /* Added Pixelify Sans */
+  --font-pixel: 'Press Start 2P', cursive, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
