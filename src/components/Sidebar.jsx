@@ -2,6 +2,7 @@ import React from "react";
 import { TbPokeball } from "react-icons/tb";
 import { navLinks } from "../data/navLinks";
 import pokeball from "../assets/icons/pokeball.svg"
+import { NavLink } from 'react-router-dom';
 
 export default function Sidebar() {
   return (
@@ -29,18 +30,21 @@ export default function Sidebar() {
         <nav className="flex flex-col w-full gap-1 p-2 lg:p-3">
           {navLinks.map((item) => {
             const Icon = item.icon;
-            
             return (
-              <a 
-                key={item.id} 
-                href={item.href} 
-                className="group flex items-center justify-center lg:justify-start gap-3 w-full px-3 lg:px-4 py-3 rounded-xl text-sidebar-text hover:text-sidebar-hover-text hover:bg-sidebar-hover-bg transition-all duration-200 font-medium"
+              <NavLink
+                key={item.id}
+                to={item.href}
+                className={({ isActive }) =>
+                  `group flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all ${
+                    isActive
+                      ? "bg-accent-subtle text-accent font-semibold"
+                      : "text-sidebar-text hover:bg-sidebar-hover-bg hover:text-sidebar-hover-text"
+                  }`
+                }
               >
-                <Icon className="text-xl text-text-muted group-hover:text-accent transition-colors shrink-0" />
-                <span className="hidden lg:inline text-sm font-medium tracking-wide">
-                  {item.name}
-                </span>
-              </a>
+                <Icon className="text-xl shrink-0" />
+                <span className="hidden lg:inline text-sm">{item.name}</span>
+              </NavLink>
             );
           })}
         </nav>
