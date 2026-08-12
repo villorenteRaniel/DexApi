@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import PokemonCard from "./PokemonCard";
 
 export default function PokemonGrid({ viewMode, searchQuery }) {
@@ -7,46 +7,58 @@ export default function PokemonGrid({ viewMode, searchQuery }) {
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
 
+    const isFetchingRef = useRef(false);
     const LIMIT = 20;
 
-    const fetchPokemonBatch = async () => {
-        if (loading || !hasMore) return;
+    const fetchPokemonBatch = useCallback(async () => {
+        // Prevent duplicate concurrent requests or fetching when finished
+        if (isFetchingRef.current || !hasMore) return;
+        isFetchingRef.current = true;
         setLoading(true);
 
         try {
             const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${LIMIT}&offset=${offset}`);
             const data = await res.json();
 
-            // Fetch and extract ONLY the 4 necessary properties
             const parsedBatchPromises = data.results.map(async (item) => {
-            const detailRes = await fetch(item.url);
-            const raw = await detailRes.json();
+                const detailRes = await fetch(item.url);
+                const raw = await detailRes.json();
 
-            return {
-            id: raw.id,
-            name: raw.name,
-            sprite: raw.sprites.other["official-artwork"].front_default || raw.sprites.front_default,
-            types: raw.types.map((t) => t.type.name),
-            };
-        });
+                return {
+                    id: raw.id,
+                    name: raw.name,
+                    sprite: raw.sprites.other["official-artwork"].front_default || raw.sprites.front_default,
+                    types: raw.types.map((t) => t.type.name),
+                };
+            });
 
-        const parsedBatch = await Promise.all(parsedBatchPromises);
+            const parsedBatch = await Promise.all(parsedBatchPromises);
 
-        setPokemonList((prev) => [...prev, ...parsedBatch]);
-        setOffset((prev) => prev + LIMIT);
-        if (!data.next) setHasMore(false);
+            // Deduplicate by ID before appending to state
+            setPokemonList((prev) => {
+                const existingIds = new Set(prev.map((p) => p.id));
+                const uniqueNew = parsedBatch.filter((p) => !existingIds.has(p.id));
+                return [...prev, ...uniqueNew];
+            });
+
+            setOffset((prev) => prev + LIMIT);
+            if (!data.next) setHasMore(false);
         } catch (err) {
             console.error("Failed to fetch Pokémon batch:", err);
         } finally {
             setLoading(false);
+            isFetchingRef.current = false;
         }
-    };
+    }, [offset, hasMore]);
 
+    // Initial load hook
     useEffect(() => {
-        fetchPokemonBatch();
-    }, []);
+        if (offset === 0) {
+            fetchPokemonBatch();
+        }
+    }, [offset, fetchPokemonBatch]);
 
-    // Simple infinite scroll listener
+    // Infinite scroll listener hook
     useEffect(() => {
         const handleScroll = () => {
             if (
@@ -59,12 +71,13 @@ export default function PokemonGrid({ viewMode, searchQuery }) {
 
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
-    }, [offset, loading, hasMore]);
+    }, [fetchPokemonBatch]);
 
-    // Filter list by search query
-    const filteredList = pokemonList.filter((p) =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(p.id).includes(searchQuery)
+    // Derived state for search filter
+    const filteredList = pokemonList.filter(
+        (p) =>
+            p.name.toLowerCase().includes((searchQuery || "").toLowerCase()) ||
+            String(p.id).includes(searchQuery || "")
     );
 
     return (
@@ -80,4 +93,5 @@ export default function PokemonGrid({ viewMode, searchQuery }) {
             )}
         </div>
     );
+
 }
