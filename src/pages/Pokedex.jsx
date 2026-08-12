@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { VscSearch, VscSettings } from "react-icons/vsc";
 import { IoMdList } from "react-icons/io";
-import { PiSquaresFourBold } from "react-icons/pi"; // Grid view icon alternative to PiMonitor
+import { PiSquaresFourBold } from "react-icons/pi";
 import PokemonGrid from "../components/PokemonGrid";
 
 export default function Pokedex() {
-  const [viewMode, setViewMode] = useState("grid"); // "grid" | "list"
+  const [viewMode, setViewMode] = useState("grid");
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
@@ -21,10 +21,9 @@ export default function Pokedex() {
       </div>
 
       {/* Control Bar */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         {/* Search Input & Filter Button */}
         <div className="flex items-center gap-2 flex-1 max-w-md">
-          {/* Search Input Box */}
           <div className="relative w-full">
             <VscSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted text-lg pointer-events-none" />
             <input
@@ -36,7 +35,6 @@ export default function Pokedex() {
             />
           </div>
 
-          {/* Filter Modal Toggle Button */}
           <button 
             title="Filter Settings"
             className="p-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl transition-colors shrink-0 shadow-xs cursor-pointer"
@@ -46,7 +44,7 @@ export default function Pokedex() {
         </div>
 
         {/* View Layout Toggle (Grid vs List) */}
-        <div className="flex items-center gap-1 bg-bg-muted p-1 rounded-xl border border-border-main self-end sm:self-auto">
+        <div className="flex items-center gap-1 bg-bg-muted p-1 rounded-xl border border-border-main shrink-0">
           <button
             onClick={() => setViewMode("grid")}
             className={`p-2 rounded-lg text-lg transition-all cursor-pointer ${
@@ -73,12 +71,8 @@ export default function Pokedex() {
         </div>
       </div>
       
-      {/* Pokemon List Container */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-bg-surface p-4 rounded-2xl border border-border-main shadow-sm">
-        
-        {/* PokemonGrids */}
-        <PokemonGrid viewMode={viewMode} searchQuery={searchQuery} />
-      </div>
+      {/* Pokemon Grid - Directly render without a constrained wrapper */}
+      <PokemonGrid viewMode={viewMode} searchQuery={searchQuery} />
     </section>
   );
 }

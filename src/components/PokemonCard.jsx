@@ -1,47 +1,60 @@
 import React from "react";
 import { typeCardBg, typeBadge } from "../data/typeStyles";
+import { CiHeart } from "react-icons/ci";
 
 
 export default function PokemonCard({ pokemon, viewMode }) {
-  const primaryType = pokemon.types[0] || "normal";
-  const bgStyle = typeCardBg[primaryType] || "bg-bg-surface border-border-main";
-  const paddedId = `#${String(pokemon.id).padStart(3, "0")}`;
-  const capitalizedName = pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1);
+    const primaryType = pokemon.types[0] || "normal";
+    const bgStyle = typeCardBg[primaryType] || "bg-bg-surface border-border-main";
+    const paddedId = `#${String(pokemon.id).padStart(3, "0")}`;
+    const capitalizedName = pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1);
 
-  // GRID VIEW (Inspired Horizontal Split Card)
-  if (viewMode === "grid") {
+    // GRID VIEW (Inspired Horizontal Split Card)
+    if (viewMode === "grid") {
     return (
-      <div className={`group flex justify-between items-center p-4 rounded-2xl border transition-all hover:-translate-y-1 hover:shadow-md cursor-pointer ${bgStyle}`}>
-        {/* Left Info Column */}
-        <div className="flex flex-col justify-between h-full py-1">
-          <div>
-            <span className="text-xs font-bold text-text-muted tracking-wider">{paddedId}</span>
-            <h3 className="text-lg font-bold text-text-main mt-0.5">{capitalizedName}</h3>
-          </div>
+        <div className={`group flex items-center justify-between px-3.5 py-5 rounded-2xl border transition-all hover:-translate-y-0.5 hover:shadow-md cursor-pointer gap-3 ${bgStyle}`}>
+        {/* Pokemon Details */}
+        <div className="flex flex-col justify-between flex-1 min-w-0 h-full gap-2.5">
+            {/* Header: ID, Name, Favorite */}
+            <div className="flex items-center justify-between gap-1 w-full">
+                <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-[11px] font-bold text-text-muted shrink-0">{paddedId}</span>
+                    <h3 className="text-sm font-bold text-text-main truncate">{capitalizedName}</h3>
+                </div>
+                <button 
+                    type="button" 
+                    className="text-text-muted hover:text-rose-500 transition-colors shrink-0 p-0.5 cursor-pointer"
+                    title="Favorite">
+                    <CiHeart className="text-base" />
+                </button>
+            </div>
 
-          <div className="flex flex-col gap-1.5 mt-4">
+            {/* Pokemon Type/s Badges */}
+            <div className="flex items-center gap-1.5 w-full">
             {pokemon.types.map((type) => (
-              <span
+                <span
                 key={type}
-                className={`${typeBadge[type] || "bg-slate-700"} text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full w-max capitalize tracking-wide shadow-xs`}
-              >
+                className={`${typeBadge[type] || "bg-slate-700"} text-white text-[10px] font-bold py-1 px-2 rounded-full capitalize text-center tracking-wide shadow-2xs ${
+                    pokemon.types.length === 1 ? "w-full" : "flex-1 min-w-0 truncate"
+                }`}
+                >
                 {type}
-              </span>
+                </span>
             ))}
-          </div>
+            </div>
         </div>
 
-        {/* Right Sprite Container */}
-        <div className="w-24 h-24 shrink-0 flex items-center justify-center p-1 relative">
-          <img
-            src={pokemon.sprite}
-            alt={capitalizedName}
-            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-sm"
-          />
+        {/* Pokemon Sprite */}
+        <div className="w-14 h-14 shrink-0 flex items-center justify-center p-0.5">
+            <img 
+            src={pokemon.sprite} 
+            alt={capitalizedName} 
+            className="h-full w-full object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-xs" 
+            />
         </div>
-      </div>
+        </div>
     );
-  }
+    }
 
   // LIST VIEW (Clean Compact Row)
   return (
