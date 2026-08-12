@@ -81,7 +81,7 @@ export default function PokemonGrid({ viewMode, searchQuery }) {
     );
 
     return (
-        <div className={ viewMode === "grid" ? "grid grid-cols-1 lg:grid-cols-3  gap-4 mt-6" : "flex flex-col gap-3 mt-6"}>
+        <div className={ viewMode === "grid" ? "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3  gap-4 mt-6" : "flex flex-col gap-3 mt-6"}>
             {filteredList.map((pokemon) => (
                 <PokemonCard key={pokemon.id} pokemon={pokemon} viewMode={viewMode} />
             ))}
