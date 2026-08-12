@@ -1,0 +1,41 @@
+// Soft card background tints based on primary type
+export const typeCardBg = {
+    grass: "bg-emerald-500/10 border-emerald-500/20",
+    fire: "bg-orange-500/10 border-orange-500/20",
+    water: "bg-blue-500/10 border-blue-500/20",
+    bug: "bg-lime-500/10 border-lime-500/20",
+    normal: "bg-slate-500/10 border-slate-500/20",
+    poison: "bg-purple-500/10 border-purple-500/20",
+    electric: "bg-amber-500/10 border-amber-500/20",
+    ground: "bg-yellow-600/10 border-yellow-600/20",
+    fairy: "bg-pink-500/10 border-pink-500/20",
+    fighting: "bg-red-600/10 border-red-600/20",
+    psychic: "bg-rose-500/10 border-rose-500/20",
+    rock: "bg-stone-500/10 border-stone-500/20",
+    ghost: "bg-indigo-500/10 border-indigo-500/20",
+    ice: "bg-cyan-500/10 border-cyan-500/20",
+    dragon: "bg-violet-500/10 border-violet-500/20",
+    steel: "bg-slate-400/10 border-slate-400/20",
+    dark: "bg-stone-800/10 border-stone-800/20",
+};
+
+// Pill Badge Colors
+export const typeBadge = {
+    grass: "bg-emerald-600",
+    fire: "bg-orange-600",
+    water: "bg-blue-600",
+    bug: "bg-lime-600",
+    normal: "bg-slate-600",
+    poison: "bg-purple-600",
+    electric: "bg-amber-500 text-slate-900",
+    ground: "bg-yellow-700",
+    fairy: "bg-pink-600",
+    fighting: "bg-red-700",
+    psychic: "bg-rose-600",
+    rock: "bg-stone-600",
+    ghost: "bg-indigo-600",
+    ice: "bg-cyan-600",
+    dragon: "bg-violet-600",
+    steel: "bg-slate-500",
+    dark: "bg-stone-800",
+};

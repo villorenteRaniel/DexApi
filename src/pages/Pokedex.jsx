@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { VscSearch, VscSettings } from "react-icons/vsc";
 import { IoMdList } from "react-icons/io";
 import { PiSquaresFourBold } from "react-icons/pi"; // Grid view icon alternative to PiMonitor
+import PokemonGrid from "../components/PokemonGrid";
 
 export default function Pokedex() {
   const [viewMode, setViewMode] = useState("grid"); // "grid" | "list"
@@ -20,8 +21,7 @@ export default function Pokedex() {
       </div>
 
       {/* Control Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-bg-surface p-4 rounded-2xl border border-border-main shadow-sm">
-        
+      <div className="flex items-center justify-between">
         {/* Search Input & Filter Button */}
         <div className="flex items-center gap-2 flex-1 max-w-md">
           {/* Search Input Box */}
@@ -71,7 +71,13 @@ export default function Pokedex() {
             <IoMdList />
           </button>
         </div>
-
+      </div>
+      
+      {/* Pokemon List Container */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-bg-surface p-4 rounded-2xl border border-border-main shadow-sm">
+        
+        {/* PokemonGrids */}
+        <PokemonGrid viewMode={viewMode} searchQuery={searchQuery} />
       </div>
     </section>
   );
