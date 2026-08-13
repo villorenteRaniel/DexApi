@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import PokemonCard from "./PokemonCard";
+import { getPokemonBatch } from "../services/pokemonService"; // 1. Import service
 
 export default function PokemonGrid({ viewMode, searchQuery }) {
     const [pokemonList, setPokemonList] = useState([]);
@@ -11,38 +12,22 @@ export default function PokemonGrid({ viewMode, searchQuery }) {
     const LIMIT = 20;
 
     const fetchPokemonBatch = useCallback(async () => {
-        // Prevent duplicate concurrent requests or fetching when finished
         if (isFetchingRef.current || !hasMore) return;
         isFetchingRef.current = true;
         setLoading(true);
 
         try {
-            const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${LIMIT}&offset=${offset}`);
-            const data = await res.json();
+            // 2. Delegate fetching & normalization to the service
+            const { results, hasMore: nextExists } = await getPokemonBatch(LIMIT, offset);
 
-            const parsedBatchPromises = data.results.map(async (item) => {
-                const detailRes = await fetch(item.url);
-                const raw = await detailRes.json();
-
-                return {
-                    id: raw.id,
-                    name: raw.name,
-                    sprite: raw.sprites.other["official-artwork"].front_default || raw.sprites.front_default,
-                    types: raw.types.map((t) => t.type.name),
-                };
-            });
-
-            const parsedBatch = await Promise.all(parsedBatchPromises);
-
-            // Deduplicate by ID before appending to state
             setPokemonList((prev) => {
                 const existingIds = new Set(prev.map((p) => p.id));
-                const uniqueNew = parsedBatch.filter((p) => !existingIds.has(p.id));
+                const uniqueNew = results.filter((p) => !existingIds.has(p.id));
                 return [...prev, ...uniqueNew];
             });
 
             setOffset((prev) => prev + LIMIT);
-            if (!data.next) setHasMore(false);
+            setHasMore(nextExists);
         } catch (err) {
             console.error("Failed to fetch Pokémon batch:", err);
         } finally {
@@ -93,5 +78,6 @@ export default function PokemonGrid({ viewMode, searchQuery }) {
             )}
         </div>
     );
-
 }
+
+
