@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Pokedex from './pages/Pokedex';
+import Ability from './pages/Ability';
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
           {/* Default redirect to pokedex for now */}
           <Route path="/" element={<Navigate to="/pokedex" replace />} />
           <Route path="/pokedex" element={<Pokedex />} />
+          <Route path="/ability" element={<Ability />} />
         </Routes>
       </main>
     </div>
