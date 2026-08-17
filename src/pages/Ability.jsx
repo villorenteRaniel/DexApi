@@ -1,10 +1,13 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { VscSearch, VscSettings } from "react-icons/vsc";
 import AbilityGrid from "../components/AbilityGrid";
+import AbilityDetailModal from "../components/AbilityDetailModal"; // Sub-folder auto-resolves index.jsx
 
-export default function Ability(){
+export default function Ability() {
     const [searchQuery, setSearchQuery] = useState("");
-    return(
+    const [selectedAbility, setSelectedAbility] = useState(null);
+
+    return (
         <section className="px-6 py-8 w-full">
             {/* Page Header */}
             <div className="flex flex-col gap-1 mb-8">
@@ -32,15 +35,27 @@ export default function Ability(){
                     </div>
             
                     <button 
-                    title="Filter Settings"
-                    className="p-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl transition-colors shrink-0 shadow-xs cursor-pointer"
+                        title="Filter Settings"
+                        className="p-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl transition-colors shrink-0 shadow-xs cursor-pointer"
                     >
-                    <VscSettings className="text-xl" />
+                        <VscSettings className="text-xl" />
                     </button>
                 </div>           
             </div>
 
-            <AbilityGrid searchQuery={searchQuery}/>
+            {/* Ability Grid with Click Handler */}
+            <AbilityGrid 
+                searchQuery={searchQuery} 
+                onSelectAbility={(ability) => setSelectedAbility(ability)} 
+            />
+
+            {/* Ability Detail Modal */}
+            {selectedAbility && (
+                <AbilityDetailModal
+                    ability={selectedAbility}
+                    onClose={() => setSelectedAbility(null)}
+                />
+            )}
         </section>
     );
 }

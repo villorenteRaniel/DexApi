@@ -33,38 +33,7 @@ export const getPokemonBatch = async (limit = 20, offset = 0) => {
   }
 };
 
-/**
- * Fetches a paginated batch of basic ability information.
- */
-/*
-export const getAbilityBatch = async (limit = 20, offset = 0) => {
-  try {
-    const res = await fetch(`${BASE_URL}/ability?limit=${limit}&offset=${offset}`);
-    if (!res.ok) throw new Error("Failed to fetch ability list");
-    const data = await res.json();
 
-    // Map basic info with parsed ID
-    const results = data.results.map((item) => {
-      // Extract ID from URL (e.g. "https://pokeapi.co/api/v2/ability/1/")
-      const parts = item.url.split("/").filter(Boolean);
-      const id = parts[parts.length - 1];
-
-      return {
-        id: Number(id),
-        name: item.name,
-        url: item.url,
-      };
-    });
-
-    return {
-      results,
-      hasMore: Boolean(data.next),
-    };
-  } catch (error) {
-    console.error("getAbilityBatch error:", error);
-    throw error;
-  }
-};*/
 
 export const getAllAbilitiesAlphabetical = async () => {
   try {
@@ -140,6 +109,56 @@ export const getAbilityDetail = async (idOrName) => {
       hidden: hiddenPokemon,
     },
   };
+};
+
+/**
+ * Fetches full ability details including descriptions and associated Pokémon.
+ */
+export const getAbilityDetails = async (idOrName) => {
+  try {
+    const res = await fetch(`${BASE_URL}/ability/${idOrName}`);
+    if (!res.ok) throw new Error("Failed to fetch ability details");
+    const data = await res.json();
+
+    // 1. Extract English effect entries
+    const englishEffect = data.effect_entries.find((e) => e.language.name === "en");
+    const englishFlavor = data.flavor_text_entries.find((f) => f.language.name === "en");
+
+    const effectText = englishEffect?.short_effect || englishFlavor?.flavor_text || "No summary available.";
+    const inDepthEffectText = englishEffect?.effect || englishFlavor?.flavor_text || "No detailed description available.";
+
+    // 2. Fetch details for all associated Pokémon in parallel
+    const pokemonPromises = data.pokemon.map(async (p) => {
+      const detailRes = await fetch(p.pokemon.url);
+      if (!detailRes.ok) return null;
+      const raw = await detailRes.json();
+
+      return {
+        is_hidden: p.is_hidden,
+        pokemon: {
+          id: raw.id,
+          name: raw.name,
+          sprite: raw.sprites.other["official-artwork"].front_default || raw.sprites.front_default,
+          types: raw.types.map((t) => t.type.name),
+        },
+      };
+    });
+
+    const resolvedPokemon = (await Promise.all(pokemonPromises)).filter(Boolean);
+
+    return {
+      id: data.id,
+      name: data.name,
+      generation: data.generation.name.replace("generation-", "Gen ").toUpperCase(),
+      effect: effectText,
+      inDepthEffect: inDepthEffectText,
+      normalPokemon: resolvedPokemon.filter((p) => !p.is_hidden).map((p) => p.pokemon),
+      hiddenPokemon: resolvedPokemon.filter((p) => p.is_hidden).map((p) => p.pokemon),
+    };
+  } catch (error) {
+    console.error("getAbilityDetails error:", error);
+    throw error;
+  }
 };
 
 // Placeholders for future pages/features:
