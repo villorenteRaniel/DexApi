@@ -1,14 +1,37 @@
 const BASE_URL = "https://pokeapi.co/api/v2";
 
-/* Fetch pokemon list */
+// Cache store to avoid re-fetching identical data
+const cache = new Map();
 
+/**
+ * Utility: Limit concurrent promises to prevent network spikes / 429 errors
+ */
+const fetchInBatches = async (items, batchSize, fn) => {
+  const results = [];
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    const batchResults = await Promise.all(batch.map(fn));
+    results.push(...batchResults);
+  }
+  return results;
+};
+
+/**
+ * Helper: Safely construct reliable sprite URLs bypassing raw.githubusercontent limits
+ */
+const getReliableSprite = (id) => {
+  return `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/${id}.png`;
+};
+
+/* Fetch pokemon batch */
 export const getPokemonBatch = async (limit = 20, offset = 0) => {
   try {
     const res = await fetch(`${BASE_URL}/pokemon?limit=${limit}&offset=${offset}`);
     if (!res.ok) throw new Error("Failed to fetch Pokémon list");
     const data = await res.json();
 
-    const detailPromises = data.results.map(async (item) => {
+    // Fetch details in small concurrent batches (10 at a time)
+    const parsedBatch = await fetchInBatches(data.results, 10, async (item) => {
       const detailRes = await fetch(item.url);
       if (!detailRes.ok) throw new Error(`Failed to fetch details for ${item.name}`);
       const raw = await detailRes.json();
@@ -16,12 +39,10 @@ export const getPokemonBatch = async (limit = 20, offset = 0) => {
       return {
         id: raw.id,
         name: raw.name,
-        sprite: raw.sprites.other["official-artwork"].front_default || raw.sprites.front_default,
+        sprite: getReliableSprite(raw.id),
         types: raw.types.map((t) => t.type.name),
       };
     });
-
-    const parsedBatch = await Promise.all(detailPromises);
 
     return {
       results: parsedBatch,
@@ -33,135 +54,110 @@ export const getPokemonBatch = async (limit = 20, offset = 0) => {
   }
 };
 
-
-
+/* Fetch all abilities alphabetical */
 export const getAllAbilitiesAlphabetical = async () => {
+  if (cache.has("allAbilities")) {
+    return cache.get("allAbilities");
+  }
+
   try {
-    // 1. Fetch the base list (~300 abilities)
     const res = await fetch(`${BASE_URL}/ability?limit=400&offset=0`);
     if (!res.ok) throw new Error("Failed to fetch abilities");
     const data = await res.json();
 
     const formatGeneration = (genName) => {
-      if (!genName) return "Unknown";
+      if (!genName) return "Gen I";
       const parts = genName.split("-");
-      if (parts.length < 2) return genName;
-      return `Gen ${parts[1].toUpperCase()}`;
+      return parts.length < 2 ? genName : `Gen ${parts[1].toUpperCase()}`;
     };
 
-    // 2. Fetch full details for each ability to get its generation data
-    const detailedResults = await Promise.all(
-      data.results.map(async (item) => {
+    // Process 20 abilities at a time instead of 400 at once
+    const detailedResults = await fetchInBatches(data.results, 20, async (item) => {
+      try {
         const detailRes = await fetch(item.url);
         const raw = await detailRes.json();
-
         return {
           id: raw.id,
           name: raw.name,
           generation: formatGeneration(raw.generation?.name),
           url: item.url,
         };
-      })
-    );
+      } catch {
+        return {
+          id: item.url.split("/").slice(-2, -1)[0],
+          name: item.name,
+          generation: "Unknown",
+          url: item.url,
+        };
+      }
+    });
 
-    // 3. Sort globally A-Z
-    return detailedResults.sort((a, b) => a.name.localeCompare(b.name));
+    const sorted = detailedResults.sort((a, b) => a.name.localeCompare(b.name));
+    cache.set("allAbilities", sorted);
+    return sorted;
   } catch (error) {
     console.error("getAllAbilitiesAlphabetical error:", error);
     throw error;
   }
 };
 
-// src/services/pokemonService.js
-
-export const getAbilityDetail = async (idOrName) => {
-  const res = await fetch(`https://pokeapi.co/api/v2/ability/${idOrName}`);
-  const raw = await res.json();
-
-  const englishEffect = raw.effect_entries?.find((e) => e.language.name === "en");
-  const englishFlavorText = raw.flavor_text_entries?.find((f) => f.language.name === "en");
-
-  // Separate normal vs hidden ability holders
-  const normalPokemon = [];
-  const hiddenPokemon = [];
-
-  raw.pokemon.forEach((p) => {
-    const pData = {
-      name: p.pokemon.name,
-      url: p.pokemon.url, // Contains ID to fetch sprites if needed
-    };
-
-    if (p.is_hidden) {
-      hiddenPokemon.push(pData);
-    } else {
-      normalPokemon.push(pData);
-    }
-  });
-
-  return {
-    id: raw.id,
-    name: raw.name,
-    generation: raw.generation.name,
-    effect: englishEffect?.short_effect || "No description available.",
-    flavorText: englishFlavorText?.flavor_text || "",
-    pokemonLists: {
-      normal: normalPokemon,
-      hidden: hiddenPokemon,
-    },
-  };
-};
-
 /**
  * Fetches full ability details including descriptions and associated Pokémon.
  */
 export const getAbilityDetails = async (idOrName) => {
+  const cacheKey = `ability_${idOrName}`;
+  if (cache.has(cacheKey)) {
+    return cache.get(cacheKey);
+  }
+
   try {
     const res = await fetch(`${BASE_URL}/ability/${idOrName}`);
     if (!res.ok) throw new Error("Failed to fetch ability details");
     const data = await res.json();
 
-    // 1. Extract English effect entries
     const englishEffect = data.effect_entries.find((e) => e.language.name === "en");
     const englishFlavor = data.flavor_text_entries.find((f) => f.language.name === "en");
 
     const effectText = englishEffect?.short_effect || englishFlavor?.flavor_text || "No summary available.";
     const inDepthEffectText = englishEffect?.effect || englishFlavor?.flavor_text || "No detailed description available.";
 
-    // 2. Fetch details for all associated Pokémon in parallel
-    const pokemonPromises = data.pokemon.map(async (p) => {
-      const detailRes = await fetch(p.pokemon.url);
-      if (!detailRes.ok) return null;
-      const raw = await detailRes.json();
+    // Fetch Pokémon details in batches of 10
+    const resolvedPokemon = await fetchInBatches(data.pokemon, 10, async (p) => {
+      try {
+        const detailRes = await fetch(p.pokemon.url);
+        if (!detailRes.ok) return null;
+        const raw = await detailRes.json();
 
-      return {
-        is_hidden: p.is_hidden,
-        pokemon: {
-          id: raw.id,
-          name: raw.name,
-          sprite: raw.sprites.other["official-artwork"].front_default || raw.sprites.front_default,
-          types: raw.types.map((t) => t.type.name),
-        },
-      };
+        return {
+          is_hidden: p.is_hidden,
+          pokemon: {
+            id: raw.id,
+            name: raw.name,
+            sprite: getReliableSprite(raw.id),
+            types: raw.types.map((t) => t.type.name),
+          },
+        };
+      } catch {
+        return null;
+      }
     });
 
-    const resolvedPokemon = (await Promise.all(pokemonPromises)).filter(Boolean);
+    const validPokemon = resolvedPokemon.filter(Boolean);
 
-    return {
+    const result = {
       id: data.id,
       name: data.name,
-      generation: data.generation.name.replace("generation-", "Gen ").toUpperCase(),
+      generation: data.generation?.name ? data.generation.name.replace("generation-", "Gen ").toUpperCase() : "GEN I",
       effect: effectText,
       inDepthEffect: inDepthEffectText,
-      normalPokemon: resolvedPokemon.filter((p) => !p.is_hidden).map((p) => p.pokemon),
-      hiddenPokemon: resolvedPokemon.filter((p) => p.is_hidden).map((p) => p.pokemon),
+      normalPokemon: validPokemon.filter((p) => !p.is_hidden).map((p) => p.pokemon),
+      hiddenPokemon: validPokemon.filter((p) => p.is_hidden).map((p) => p.pokemon),
     };
+
+    cache.set(cacheKey, result);
+    return result;
   } catch (error) {
     console.error("getAbilityDetails error:", error);
     throw error;
   }
 };
-
-// Placeholders for future pages/features:
-// export const getPokemonByIdOrName = async (idOrName) => { ... }
-// export const  = async () => { ... }
-// export const getTypeMatchups = async () => { ... }

@@ -49,6 +49,7 @@ export default function PokemonCard({ pokemon, viewMode }) {
             <img 
             src={pokemon.sprite} 
             alt={capitalizedName} 
+            loading="lazy"
             className="h-full w-full object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-xs" 
             />
         </div>
