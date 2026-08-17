@@ -5,10 +5,11 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Pokedex from './pages/Pokedex';
 import Ability from './pages/Ability';
+import ScrollToTop from './components/ScrollToTop';
 
 export default function App() {
   return (
-    <div className="min-h-screen w-full flex bg-bg-main text-text-subtle font-sans antialiased">
+    <div className="min-h-screen w-full relative flex bg-bg-main text-text-subtle font-sans antialiased">
       <Sidebar />
       <Header />
 
@@ -21,6 +22,8 @@ export default function App() {
           <Route path="/ability" element={<Ability />} />
         </Routes>
       </main>
+      {/* Scroll to top button */}
+      <ScrollToTop />
     </div>
   );
 }
