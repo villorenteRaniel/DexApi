@@ -7,7 +7,12 @@ export default function PokemonCard({ pokemon, viewMode }) {
     const primaryType = pokemon.types[0] || "normal";
     const bgStyle = typeCardBg[primaryType] || "bg-bg-surface border-border-main";
     const paddedId = `#${String(pokemon.id).padStart(3, "0")}`;
-    const capitalizedName = pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1);
+    // Replace hyphens with spaces and capitalize each word
+    const formattedName = pokemon.name
+      .replaceAll("-", " ")
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
 
     // GRID VIEW (Inspired Horizontal Split Card)
     if (viewMode === "grid") {
@@ -48,7 +53,7 @@ export default function PokemonCard({ pokemon, viewMode }) {
         <div className="w-14 h-14 shrink-0 flex items-center justify-center p-0.5">
             <img 
             src={pokemon.sprite} 
-            alt={capitalizedName} 
+            alt={formattedName} 
             loading="lazy"
             className="h-full w-full object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-xs" 
             />
@@ -62,12 +67,12 @@ export default function PokemonCard({ pokemon, viewMode }) {
     <div className={`group flex items-center justify-between p-3 rounded-xl border transition-all hover:shadow-sm cursor-pointer gap-4 w-full ${bgStyle}`}>
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-12 h-12 shrink-0 flex items-center justify-center">
-          <img src={pokemon.sprite} alt={capitalizedName} className="h-full object-contain group-hover:scale-110 transition-transform duration-300" />
+          <img src={pokemon.sprite} alt={formattedName} className="h-full object-contain group-hover:scale-110 transition-transform duration-300" />
         </div>
         
         <div className="flex flex-col min-w-0">
           <span className="text-[11px] font-bold text-text-muted">{paddedId}</span>
-          <h3 className="text-base font-bold text-text-main truncate">{capitalizedName}</h3>
+          <h3 className="text-base font-bold text-text-main truncate">{formattedName}</h3>
         </div>
       </div>
 
