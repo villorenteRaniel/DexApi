@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Pokedex from './pages/Pokedex';
 import Ability from './pages/Ability';
+import Move from './pages/Move';
 import ScrollToTop from './components/ScrollToTop';
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/" element={<Navigate to="/pokedex" replace />} />
           <Route path="/pokedex" element={<Pokedex />} />
           <Route path="/ability" element={<Ability />} />
+          <Route path="/move" element={<Move />} />
         </Routes>
       </main>
       {/* Scroll to top button */}

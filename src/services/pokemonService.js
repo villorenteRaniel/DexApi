@@ -161,3 +161,72 @@ export const getAbilityDetails = async (idOrName) => {
     throw error;
   }
 };
+
+/* Fetch all moves alphabetically */
+export const getAllMovesAlphabetical = async () => {
+  if (cache.has("allMoves")) {
+    return cache.get("allMoves");
+  }
+
+  try {
+    const res = await fetch(`${BASE_URL}/move?limit=1000&offset=0`);
+    if (!res.ok) throw new Error("Failed to fetch moves");
+    const data = await res.json();
+
+    // Clean and sort the initial list alphabetically
+    const formatted = data.results
+      .map((item) => {
+        // Extract ID from URL (e.g., https://pokeapi.co/api/v2/move/1/)
+        const id = item.url.split("/").filter(Boolean).pop();
+        return {
+          id: Number(id),
+          name: item.name,
+          url: item.url,
+        };
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    cache.set("allMoves", formatted);
+    return formatted;
+  } catch (error) {
+    console.error("getAllMovesAlphabetical error:", error);
+    throw error;
+  }
+};
+
+/* Fetch individual Move Details */
+export const getMoveDetails = async (idOrName) => {
+  const cacheKey = `move_${idOrName}`;
+  if (cache.has(cacheKey)) {
+    return cache.get(cacheKey);
+  }
+
+  try {
+    const res = await fetch(`${BASE_URL}/move/${idOrName}`);
+    if (!res.ok) throw new Error("Failed to fetch move details");
+    const data = await res.json();
+
+    const englishEffect = data.effect_entries.find((e) => e.language.name === "en");
+    const englishFlavor = data.flavor_text_entries.find((f) => f.language.name === "en");
+
+    const result = {
+      id: data.id,
+      name: data.name,
+      accuracy: data.accuracy ?? "—",
+      power: data.power ?? "—",
+      pp: data.pp ?? "—",
+      priority: data.priority,
+      damageClass: data.damage_class?.name || "status", // physical | special | status
+      type: data.type?.name || "normal",
+      effect: englishEffect?.short_effect || englishFlavor?.flavor_text || "No summary available.",
+      inDepthEffect: englishEffect?.effect || englishFlavor?.flavor_text || "No detailed description available.",
+      learnedBy: data.learned_by_pokemon || [],
+    };
+
+    cache.set(cacheKey, result);
+    return result;
+  } catch (error) {
+    console.error("getMoveDetails error:", error);
+    throw error;
+  }
+};
