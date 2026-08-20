@@ -230,3 +230,25 @@ export const getMoveDetails = async (idOrName) => {
     throw error;
   }
 };
+
+// Add this helper function to pokemonService.js
+export const getMoveHeaderDetails = async (idOrName) => {
+  const cacheKey = `move_header_${idOrName}`;
+  if (cache.has(cacheKey)) return cache.get(cacheKey);
+
+  try {
+    const res = await fetch(`${BASE_URL}/move/${idOrName}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+
+    const result = {
+      type: data.type?.name || "normal",
+      damageClass: data.damage_class?.name || "status",
+    };
+
+    cache.set(cacheKey, result);
+    return result;
+  } catch {
+    return null;
+  }
+};

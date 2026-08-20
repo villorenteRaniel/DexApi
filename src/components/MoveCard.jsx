@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { typeBadge } from "../data/typeStyles";
+import { getMoveHeaderDetails } from "../services/pokemonService";
 
-// Utility styling for damage categories
 const damageClassStyles = {
   physical: "bg-orange-600 text-white",
   special: "bg-blue-600 text-white",
@@ -9,6 +9,23 @@ const damageClassStyles = {
 };
 
 export default function MoveCard({ move, onClick }) {
+  const [meta, setMeta] = useState({ type: move.type, damageClass: move.damageClass });
+
+  useEffect(() => {
+    // Only fetch if missing
+    if (!meta.type || !meta.damageClass) {
+      let isMounted = true;
+      getMoveHeaderDetails(move.id || move.name).then((data) => {
+        if (data && isMounted) {
+          setMeta(data);
+        }
+      });
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [move]);
+
   const formattedName = move.name
     .replaceAll("-", " ")
     .split(" ")
@@ -24,29 +41,25 @@ export default function MoveCard({ move, onClick }) {
         <h3 className="text-base font-bold text-text-main truncate group-hover:text-accent transition-colors">
           {formattedName}
         </h3>
-        <span className="text-xs font-semibold text-text-subtle">
-          #{String(move.id).padStart(3, "0")}
-        </span>
       </div>
 
-      {/* Badges for Type and Category */}
       <div className="flex items-center gap-1.5 shrink-0">
-        {move.type && (
+        {meta.type && (
           <span
             className={`${
-              typeBadge[move.type] || "bg-slate-700"
-            } text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full capitalize shadow-2xs`}
+              typeBadge[meta.type] || "bg-slate-700"
+            } text-white text-[10px] font-bold px-2.5 py-0.5 rounded-md capitalize shadow-2xs`}
           >
-            {move.type}
+            {meta.type}
           </span>
         )}
-        {move.damageClass && (
+        {meta.damageClass && (
           <span
             className={`${
-              damageClassStyles[move.damageClass] || "bg-slate-600"
+              damageClassStyles[meta.damageClass] || "bg-slate-600"
             } text-[10px] font-bold px-2 py-0.5 rounded-md capitalize tracking-wide`}
           >
-            {move.damageClass}
+            {meta.damageClass}
           </span>
         )}
       </div>
