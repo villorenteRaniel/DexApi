@@ -29,7 +29,7 @@ export default function MoveCard({ move, onClick }) {
         </span>
       </div>
 
-      {/* Badges for Type and Category if available */}
+      {/* Badges for Type and Category */}
       <div className="flex items-center gap-1.5 shrink-0">
         {move.type && (
           <span
