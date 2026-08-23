@@ -194,42 +194,7 @@ export const getAllMovesAlphabetical = async () => {
   }
 };
 
-/* Fetch individual Move Details */
-export const getMoveDetails = async (idOrName) => {
-  const cacheKey = `move_${idOrName}`;
-  if (cache.has(cacheKey)) {
-    return cache.get(cacheKey);
-  }
 
-  try {
-    const res = await fetch(`${BASE_URL}/move/${idOrName}`);
-    if (!res.ok) throw new Error("Failed to fetch move details");
-    const data = await res.json();
-
-    const englishEffect = data.effect_entries.find((e) => e.language.name === "en");
-    const englishFlavor = data.flavor_text_entries.find((f) => f.language.name === "en");
-
-    const result = {
-      id: data.id,
-      name: data.name,
-      accuracy: data.accuracy ?? "—",
-      power: data.power ?? "—",
-      pp: data.pp ?? "—",
-      priority: data.priority,
-      damageClass: data.damage_class?.name || "status", // physical | special | status
-      type: data.type?.name || "normal",
-      effect: englishEffect?.short_effect || englishFlavor?.flavor_text || "No summary available.",
-      inDepthEffect: englishEffect?.effect || englishFlavor?.flavor_text || "No detailed description available.",
-      learnedBy: data.learned_by_pokemon || [],
-    };
-
-    cache.set(cacheKey, result);
-    return result;
-  } catch (error) {
-    console.error("getMoveDetails error:", error);
-    throw error;
-  }
-};
 
 // Add this helper function to pokemonService.js
 export const getMoveHeaderDetails = async (idOrName) => {
@@ -250,5 +215,53 @@ export const getMoveHeaderDetails = async (idOrName) => {
     return result;
   } catch {
     return null;
+  }
+};
+
+/* Fetch individual Move Details */
+export const getMoveDetails = async (idOrName) => {
+  const cacheKey = `move_${idOrName}`;
+  if (cache.has(cacheKey)) {
+    return cache.get(cacheKey);
+  }
+
+  try {
+    const res = await fetch(`${BASE_URL}/move/${idOrName}`);
+    if (!res.ok) throw new Error("Failed to fetch move details");
+    const data = await res.json();
+
+    const englishEffect = data.effect_entries.find((e) => e.language.name === "en");
+    const englishFlavor = data.flavor_text_entries.find((f) => f.language.name === "en");
+
+    // Map learned_by_pokemon into valid objects for PokemonCard
+    const formattedLearnedBy = (data.learned_by_pokemon || []).map((pkmn) => {
+      const id = pkmn.url.split("/").filter(Boolean).pop();
+      return {
+        id: Number(id),
+        name: pkmn.name,
+        types: [], // Fallback empty array so pokemon.types[0] doesn't throw an error
+        sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
+      };
+    });
+
+    const result = {
+      id: data.id,
+      name: data.name,
+      accuracy: data.accuracy ?? "—",
+      power: data.power ?? "—",
+      pp: data.pp ?? "—",
+      priority: data.priority,
+      damageClass: data.damage_class?.name || "status",
+      type: data.type?.name || "normal",
+      effect: englishEffect?.short_effect || englishFlavor?.flavor_text || "No summary available.",
+      inDepthEffect: englishEffect?.effect || englishFlavor?.flavor_text || "No detailed description available.",
+      learnedBy: formattedLearnedBy,
+    };
+
+    cache.set(cacheKey, result);
+    return result;
+  } catch (error) {
+    console.error("getMoveDetails error:", error);
+    throw error;
   }
 };

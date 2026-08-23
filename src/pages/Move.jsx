@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getAllMovesAlphabetical } from "../services/pokemonService";
-import MoveCard from "../components/MoveCard";
+import MoveGrid from "../components/MoveGrid";
+import MoveDetailModal from "../components/MoveDetailModal";
 import { CiSearch } from "react-icons/ci";
 
 export default function Move() {
@@ -33,7 +34,7 @@ export default function Move() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {/* Top Header & Search Bar */}
+      {/* Header & Search Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-text-main">Moves</h1>
@@ -55,28 +56,25 @@ export default function Move() {
         </div>
       </div>
 
-      {/* Main Grid */}
+      {/* Grid Display */}
       {loading ? (
         <div className="p-12 text-center text-text-subtle font-medium">
           Loading moves index...
         </div>
-      ) : filteredMoves.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredMoves.map((move) => (
-            <MoveCard
-              key={move.id}
-              move={move}
-              onClick={(m) => setSelectedMove(m)}
-            />
-          ))}
-        </div>
       ) : (
-        <div className="p-12 text-center text-text-subtle font-medium">
-          No moves found matching "{search}".
-        </div>
+        <MoveGrid
+          moves={filteredMoves}
+          onSelectMove={(move) => setSelectedMove(move)}
+        />
       )}
 
-      {/* TODO: Place MoveDetailModal here once built */}
+      {/* Move Detail Modal */}
+      {selectedMove && (
+        <MoveDetailModal
+          move={selectedMove}
+          onClose={() => setSelectedMove(null)}
+        />
+      )}
     </div>
   );
 }
