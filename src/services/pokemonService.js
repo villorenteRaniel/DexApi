@@ -233,15 +233,30 @@ export const getMoveDetails = async (idOrName) => {
     const englishEffect = data.effect_entries.find((e) => e.language.name === "en");
     const englishFlavor = data.flavor_text_entries.find((f) => f.language.name === "en");
 
-    // Map learned_by_pokemon into valid objects for PokemonCard
-    const formattedLearnedBy = (data.learned_by_pokemon || []).map((pkmn) => {
+    const rawPokemonList = data.learned_by_pokemon || [];
+
+    // Fetch details in batches of 10 for ALL pokémon in the list
+    const formattedLearnedBy = await fetchInBatches(rawPokemonList, 10, async (pkmn) => {
       const id = pkmn.url.split("/").filter(Boolean).pop();
-      return {
-        id: Number(id),
-        name: pkmn.name,
-        types: [], // Fallback empty array so pokemon.types[0] doesn't throw an error
-        sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
-      };
+      try {
+        const pkmnRes = await fetch(`${BASE_URL}/pokemon/${id}`);
+        if (!pkmnRes.ok) throw new Error();
+        const pkmnData = await pkmnRes.json();
+
+        return {
+          id: pkmnData.id,
+          name: pkmnData.name,
+          types: pkmnData.types.map((t) => t.type.name),
+          sprite: pkmnData.sprites.other["official-artwork"].front_default || pkmnData.sprites.front_default,
+        };
+      } catch {
+        return {
+          id: Number(id),
+          name: pkmn.name,
+          types: [],
+          sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
+        };
+      }
     });
 
     const result = {
