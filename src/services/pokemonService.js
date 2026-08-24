@@ -243,11 +243,14 @@ export const getMoveDetails = async (idOrName) => {
         if (!pkmnRes.ok) throw new Error();
         const pkmnData = await pkmnRes.json();
 
+        const officialArtwork = pkmnData.sprites?.other?.["official-artwork"]?.front_default;
+        const defaultSprite = pkmnData.sprites?.front_default;
+
         return {
           id: pkmnData.id,
           name: pkmnData.name,
           types: pkmnData.types.map((t) => t.type.name),
-          sprite: pkmnData.sprites.other["official-artwork"].front_default || pkmnData.sprites.front_default,
+          sprite: officialArtwork || defaultSprite || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
         };
       } catch {
         return {
