@@ -283,3 +283,39 @@ export const getMoveDetails = async (idOrName) => {
     throw error;
   }
 };
+
+/* Fetch all natures */
+export const getAllNatures = async () => {
+  const cacheKey = "all_natures";
+  if (cache.has(cacheKey)) return cache.get(cacheKey);
+
+  try {
+    const res = await fetch(`${BASE_URL}/nature?limit=100`);
+    if (!res.ok) throw new Error("Failed to fetch natures");
+    const data = await res.json();
+
+    // Natures are lightweight (only 25 total), so fetch details directly
+    const details = await Promise.all(
+      data.results.map(async (n) => {
+        const nRes = await fetch(n.url);
+        const nData = await nRes.json();
+
+        return {
+          id: nData.id,
+          name: nData.name,
+          increasedStat: nData.increased_stat?.name || null,
+          decreasedStat: nData.decreased_stat?.name || null,
+          likesFlavor: nData.likes_flavor?.name || null,
+          hatesFlavor: nData.hates_flavor?.name || null,
+        };
+      })
+    );
+
+    const sorted = details.sort((a, b) => a.name.localeCompare(b.name));
+    cache.set(cacheKey, sorted);
+    return sorted;
+  } catch (error) {
+    console.error("getAllNatures error:", error);
+    throw error;
+  }
+};
