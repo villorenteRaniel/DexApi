@@ -7,6 +7,7 @@ import Pokedex from './pages/Pokedex';
 import Ability from './pages/Ability';
 import Move from './pages/Move';
 import Nature from './pages/Nature';
+import Type from './pages/Type';
 import ScrollToTop from './components/ScrollToTop';
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/pokedex" element={<Pokedex />} />
           <Route path="/ability" element={<Ability />} />
           <Route path="/move" element={<Move />} />
+          <Route path="/type" element={<Type />} />
           <Route path="/nature" element={<Nature />} />
         </Routes>
       </main>
