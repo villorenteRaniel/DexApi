@@ -3,7 +3,7 @@ import React from "react";
 export default function PokemonInfoTab({ details }) {
   if (!details) return null;
 
-  const { stats, bst, abilities, sprites, evolutionChain } = details;
+  const { flavorText, stats, bst, abilities, sprites, evolutionChain } = details;
 
   // Helper for Stat Colors & Max Value Ratios
   const getStatBarColor = (val) => {
@@ -24,6 +24,17 @@ export default function PokemonInfoTab({ details }) {
 
   return (
     <div className="flex flex-col gap-8">
+        {/* Pokédex Entry Banner */}
+        {flavorText && (
+            <div className="bg-bg-surface/90 border border-border-main/60 p-4 rounded-2xl shadow-xs">
+            <h3 className="text-[10px] font-black uppercase tracking-wider text-text-subtle mb-1">
+                Pokédex Entry
+            </h3>
+            <p className="text-sm font-medium text-text-main leading-relaxed italic">
+                “{flavorText}”
+            </p>
+            </div>
+        )}
       {/* 1. Base Stats Section */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">

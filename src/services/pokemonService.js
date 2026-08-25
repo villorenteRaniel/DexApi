@@ -371,6 +371,14 @@ export const getPokemonDetails = async (nameOrId) => {
     const speciesRes = await fetch(data.species.url);
     const speciesData = await speciesRes.json();
 
+    // Extract the first English Pokédex entry and clean up special character breaks
+    const englishEntry = speciesData.flavor_text_entries?.find(
+      (entry) => entry.language.name === "en"
+    );
+    const flavorText = englishEntry
+      ? englishEntry.flavor_text.replace(/[\n\f]/g, " ")
+      : "No Pokédex description available.";
+
     // 3. Fetch & Parse Evolution Chain
     let evolutionChain = [];
     if (speciesData.evolution_chain?.url) {
@@ -431,6 +439,7 @@ export const getPokemonDetails = async (nameOrId) => {
     return {
       id: data.id,
       name: data.name,
+      flavorText,
       types: data.types.map((t) => t.type.name),
       height: data.height / 10, // Convert to meters
       weight: data.weight / 10, // Convert to kg
