@@ -41,3 +41,24 @@ export const typeBadge = {
     steel: "bg-slate-500",
     dark: "bg-stone-800",
 };
+
+export const typeModalBg = {
+    grass: "bg-emerald-100/90 border-emerald-300",
+    fire: "bg-orange-100/90 border-orange-300",
+    water: "bg-sky-100/90 border-sky-300",
+    bug: "bg-lime-100/90 border-lime-300",
+    normal: "bg-slate-200/90 border-slate-300",
+    poison: "bg-purple-100/90 border-purple-300",
+    electric: "bg-amber-100/90 border-amber-300",
+    ground: "bg-yellow-100/90 border-yellow-300",
+    fairy: "bg-pink-100/90 border-pink-300",
+    fighting: "bg-red-100/90 border-red-300",
+    flying: "bg-indigo-100/90 border-indigo-300",
+    psychic: "bg-rose-100/90 border-rose-300",
+    rock: "bg-stone-200/90 border-stone-300",
+    ghost: "bg-violet-100/90 border-violet-300",
+    ice: "bg-cyan-100/90 border-cyan-300",
+    dragon: "bg-purple-200/90 border-purple-400",
+    steel: "bg-slate-200/90 border-slate-400",
+    dark: "bg-stone-300/90 border-stone-500",
+};
