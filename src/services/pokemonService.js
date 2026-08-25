@@ -319,3 +319,92 @@ export const getAllNatures = async () => {
     throw error;
   }
 };
+
+/**
+ * Fetches full details for a single Pokémon by name or ID
+ */
+export const getPokemonDetails = async (nameOrId) => {
+  try {
+    // 1. Fetch primary Pokémon data
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${String(nameOrId).toLowerCase()}`);
+    if (!res.ok) throw new Error("Failed to fetch Pokémon details");
+    const data = await res.json();
+
+    // 2. Fetch Species data (for evolution chain URL, gender rate, egg groups, flavor text)
+    const speciesRes = await fetch(data.species.url);
+    const speciesData = await speciesRes.json();
+
+    // 3. Normalize Base Stats
+    const stats = data.stats.reduce((acc, curr) => {
+      acc[curr.stat.name] = curr.base_stat;
+      return acc;
+    }, {});
+
+    // Calculate Total Base Stat (BST)
+    const bst = data.stats.reduce((total, curr) => total + curr.base_stat, 0);
+
+    // 4. Normalize Abilities
+    const abilities = data.abilities.map((a) => ({
+      name: a.ability.name,
+      isHidden: a.is_hidden,
+      slot: a.slot,
+    }));
+
+    // 5. Categorize Moves by Learn Method
+    const moves = {
+      levelUp: [],
+      machine: [],
+      egg: [],
+      tutor: [],
+    };
+
+    data.moves.forEach((m) => {
+      // Grab latest version group details
+      const latestDetail = m.version_group_details[m.version_group_details.length - 1];
+      if (!latestDetail) return;
+
+      const moveObj = {
+        name: m.move.name,
+        levelLearned: latestDetail.level_learned_at,
+        method: latestDetail.move_learn_method.name,
+      };
+
+      if (moveObj.method === "level-up") moves.levelUp.push(moveObj);
+      else if (moveObj.method === "machine") moves.machine.push(moveObj);
+      else if (moveObj.method === "egg") moves.egg.push(moveObj);
+      else if (moveObj.method === "tutor") moves.tutor.push(moveObj);
+    });
+
+    // Sort level-up moves by level
+    moves.levelUp.sort((a, b) => a.levelLearned - b.levelLearned);
+
+    // 6. Return structured data
+    return {
+      id: data.id,
+      name: data.name,
+      types: data.types.map((t) => t.type.name),
+      height: data.height / 10, // Convert to meters
+      weight: data.weight / 10, // Convert to kg
+      sprites: {
+        normal: data.sprites.other["official-artwork"]?.front_default || data.sprites.front_default,
+        shiny: data.sprites.other["official-artwork"]?.front_shiny || data.sprites.front_shiny,
+        animated: data.sprites.versions?.["generation-v"]?.["black-white"]?.animated?.front_default,
+      },
+      stats,
+      bst,
+      abilities,
+      moves,
+      // Species / Breeding / Extra Info
+      species: {
+        eggGroups: speciesData.egg_groups.map((e) => e.name),
+        genderRate: speciesData.gender_rate, // -1: genderless, otherwise 0-8 (eighths female)
+        hatchCounter: speciesData.hatch_counter,
+        captureRate: speciesData.capture_rate,
+        evolutionChainUrl: speciesData.evolution_chain?.url,
+      },
+    };
+  } catch (err) {
+    console.error("Error in getPokemonDetails:", err);
+    throw err;
+  }
+};

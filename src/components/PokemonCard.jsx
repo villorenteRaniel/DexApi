@@ -2,12 +2,12 @@ import React from "react";
 import { typeCardBg, typeBadge } from "../data/typeStyles";
 import { CiHeart } from "react-icons/ci";
 
-export default function PokemonCard({ pokemon, viewMode }) {
+// 1. Accept onClick prop
+export default function PokemonCard({ pokemon, viewMode, onClick }) {
   const primaryType = pokemon?.types?.[0] || "normal";
   const bgStyle = typeCardBg[primaryType] || "bg-bg-surface border-border-main";
   const paddedId = `#${String(pokemon?.id || 0).padStart(3, "0")}`;
 
-  // Replace hyphens with spaces and capitalize each word
   const formattedName = (pokemon?.name || "Unknown")
     .replaceAll("-", " ")
     .split(" ")
@@ -16,13 +16,14 @@ export default function PokemonCard({ pokemon, viewMode }) {
 
   const typesList = pokemon?.types || [];
 
-  // GRID VIEW (Inspired Horizontal Split Card)
+  // GRID VIEW
   if (viewMode === "grid") {
     return (
-      <div className={`group flex items-center justify-between px-3.5 py-5 rounded-2xl border transition-all hover:-translate-y-0.5 hover:shadow-md cursor-pointer gap-3 ${bgStyle}`}>
-        {/* Pokemon Details */}
+      <div 
+        onClick={onClick} // 2. Attach onClick to grid container
+        className={`group flex items-center justify-between px-3.5 py-5 rounded-2xl border transition-all hover:-translate-y-0.5 hover:shadow-md cursor-pointer gap-3 ${bgStyle}`}
+      >
         <div className="flex flex-col justify-between flex-1 min-w-0 h-full gap-2.5">
-          {/* Header: ID, Name, Favorite */}
           <div className="flex items-center justify-between gap-1 w-full">
             <div className="flex items-center gap-3 min-w-0">
               <span className="text-[11px] font-bold text-text-muted shrink-0">{paddedId}</span>
@@ -30,6 +31,10 @@ export default function PokemonCard({ pokemon, viewMode }) {
             </div>
             <button 
               type="button" 
+              onClick={(e) => {
+                e.stopPropagation(); // 3. Prevent opening modal on heart click
+                // Favorite logic here
+              }}
               className="text-text-muted hover:text-rose-500 transition-colors shrink-0 p-0.5 cursor-pointer"
               title="Favorite"
             >
@@ -37,7 +42,6 @@ export default function PokemonCard({ pokemon, viewMode }) {
             </button>
           </div>
 
-          {/* Pokemon Type/s Badges */}
           <div className="flex items-center gap-1.5 w-full">
             {typesList.map((type) => (
               <span
@@ -52,7 +56,6 @@ export default function PokemonCard({ pokemon, viewMode }) {
           </div>
         </div>
 
-        {/* Pokemon Sprite */}
         <div className="w-14 h-14 shrink-0 flex items-center justify-center p-0.5">
           <img 
             src={pokemon?.sprite} 
@@ -65,9 +68,12 @@ export default function PokemonCard({ pokemon, viewMode }) {
     );
   }
 
-  // LIST VIEW (Clean Compact Row)
+  // LIST VIEW
   return (
-    <div className={`group flex items-center justify-between p-3 rounded-xl border transition-all hover:shadow-sm cursor-pointer gap-4 w-full ${bgStyle}`}>
+    <div 
+      onClick={onClick} // 4. Attach onClick to list container
+      className={`group flex items-center justify-between p-3 rounded-xl border transition-all hover:shadow-sm cursor-pointer gap-4 w-full ${bgStyle}`}
+    >
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-12 h-12 shrink-0 flex items-center justify-center">
           <img src={pokemon?.sprite} alt={formattedName} className="h-full object-contain group-hover:scale-110 transition-transform duration-300" />
