@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { typeCardBg, typeModalBg,  typeBadge } from "../../data/typeStyles";
+import { typeModalBg,  typeBadge } from "../../data/typeStyles";
 import { getPokemonDetails } from "../../services/pokemonService";
+import { TbInfoCircle, TbSword, TbPlus } from "react-icons/tb";
 import PokemonInfoTab from "./PokemonInfoTab";
 import PokemonMoveTab from "./PokemonMoveTab";
 import PokemonMoreTab from "./PokemonMoreTab";
@@ -79,22 +80,32 @@ export default function PokemonDetailModal({ pokemon, onClose }) {
             </button>
           </div>
 
-          {/* Tab Navigation */}
-          <div className="flex items-center gap-6 px-6 border-t border-border-main/20 bg-black/5">
-            {["info", "moves", "more"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-3 text-xs font-black uppercase tracking-wider cursor-pointer border-b-2 transition-all ${
-                  activeTab === tab
-                    ? "border-accent text-accent"
-                    : "border-transparent text-text-subtle hover:text-text-main"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
+            {/* Tab Navigation Row */}
+            <div className="flex items-center justify-center px-6 py-3 border-t border-black/10 bg-black/5">
+                <div className="flex items-center gap-1.5 p-1 bg-black/10 rounded-2xl">
+                    {[
+                    { id: "info", label: "Info", icon: TbInfoCircle },
+                    { id: "moves", label: "Moves", icon: TbSword },
+                    { id: "more", label: "More", icon: TbPlus },
+                    ].map(({ id, label, icon: Icon }) => {
+                    const isActive = activeTab === id;
+                    return (
+                        <button
+                        key={id}
+                        onClick={() => setActiveTab(id)}
+                        className={`flex items-center gap-2 px-5 py-1.5 text-xs font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer ${
+                            isActive
+                            ? "bg-bg-surface text-text-main shadow-xs scale-[1.02]"
+                            : "text-text-subtle hover:text-text-main hover:bg-black/5"
+                        }`}
+                        >
+                        <Icon className="w-4 h-4" />
+                        <span>{label}</span>
+                        </button>
+                    );
+                    })}
+                </div>
+            </div>
         </div>
 
         {/* Modal Body */}
