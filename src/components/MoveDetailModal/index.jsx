@@ -3,9 +3,22 @@ import { getMoveDetails } from "../../services/pokemonService";
 import MoveInfoSection from "./MoveInfoSection";
 import MovePokemonList from "./MovePokemonList";
 
-export default function MoveDetailModal({ move, onClose }) {
+export default function MoveDetailModal({ isOpen = true, move, onClose }) {
   const [details, setDetails] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // 1. Lock background scrolling while modal is active
+    useEffect(() => {
+      if (isOpen) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "unset";
+      }
+  
+      return () => {
+        document.body.style.overflow = "unset";
+      };
+    }, [isOpen]);
 
   useEffect(() => {
     if (!move) return;
@@ -27,7 +40,7 @@ export default function MoveDetailModal({ move, onClose }) {
     };
   }, [move]);
 
-  if (!move) return null;
+  if (!isOpen || !move) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">

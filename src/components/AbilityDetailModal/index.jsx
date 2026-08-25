@@ -3,9 +3,22 @@ import { getAbilityDetails } from "../../services/pokemonService";
 import AbilityInfoSection from "./AbilityInfoSection";
 import AbilityPokemonTab from "./AbilityPokemonTab";
 
-export default function AbilityDetailModal({ ability, onClose }) {
+export default function AbilityDetailModal({ isOpen = true, ability, onClose }) {
   const [details, setDetails] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // 1. Lock background scrolling while modal is active
+    useEffect(() => {
+      if (isOpen) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "unset";
+      }
+  
+      return () => {
+        document.body.style.overflow = "unset";
+      };
+    }, [isOpen]);
 
   useEffect(() => {
     if (!ability) return;
@@ -27,7 +40,7 @@ export default function AbilityDetailModal({ ability, onClose }) {
     };
   }, [ability]);
 
-  if (!ability) return null;
+  if (!isOpen || !ability) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">

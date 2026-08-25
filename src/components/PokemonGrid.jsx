@@ -87,6 +87,7 @@ export default function PokemonGrid({ viewMode, searchQuery }) {
             {/* 4. Render modal conditionally */}
             {selectedPokemon && (
                 <PokemonDetailModal 
+                    isOpen={Boolean(selectedPokemon)}
                     pokemon={selectedPokemon} 
                     onClose={() => setSelectedPokemon(null)} 
                 />
