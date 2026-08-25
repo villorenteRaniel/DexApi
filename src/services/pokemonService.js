@@ -321,6 +321,43 @@ export const getAllNatures = async () => {
 };
 
 /**
+ * Helper to recursively parse PokeAPI's evolution chain structure
+ */
+const parseEvolutionChain = async (chainNode) => {
+  const chain = [];
+
+  let current = chainNode;
+  while (current) {
+    const speciesName = current.species.name;
+    
+    // Extract Pokémon ID from species URL (e.g., https://pokeapi.co/api/v2/pokemon-species/1/ -> "1")
+    const urlParts = current.species.url.split("/").filter(Boolean);
+    const speciesId = urlParts[urlParts.length - 1];
+
+    // Grab evolution details (if available for stage 2/3)
+    const evoDetails = current.evolution_details?.[0];
+    const minLevel = evoDetails?.min_level || null;
+    const trigger = evoDetails?.trigger?.name || null;
+    const item = evoDetails?.item?.name || null;
+
+    chain.push({
+      id: Number(speciesId),
+      name: speciesName,
+      minLevel,
+      trigger,
+      item,
+      // Official artwork URL generated directly using ID
+      sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${speciesId}.png`,
+    });
+
+    // Move down the primary evolution branch
+    current = current.evolves_to?.[0];
+  }
+
+  return chain;
+};
+
+/**
  * Fetches full details for a single Pokémon by name or ID
  */
 export const getPokemonDetails = async (nameOrId) => {
@@ -334,7 +371,19 @@ export const getPokemonDetails = async (nameOrId) => {
     const speciesRes = await fetch(data.species.url);
     const speciesData = await speciesRes.json();
 
-    // 3. Normalize Base Stats
+    // 3. Fetch & Parse Evolution Chain
+    let evolutionChain = [];
+    if (speciesData.evolution_chain?.url) {
+      try {
+        const evoRes = await fetch(speciesData.evolution_chain.url);
+        const evoData = await evoRes.json();
+        evolutionChain = await parseEvolutionChain(evoData.chain);
+      } catch (evoErr) {
+        console.error("Failed to load evolution chain:", evoErr);
+      }
+    }
+
+    // 4. Normalize Base Stats
     const stats = data.stats.reduce((acc, curr) => {
       acc[curr.stat.name] = curr.base_stat;
       return acc;
@@ -343,14 +392,14 @@ export const getPokemonDetails = async (nameOrId) => {
     // Calculate Total Base Stat (BST)
     const bst = data.stats.reduce((total, curr) => total + curr.base_stat, 0);
 
-    // 4. Normalize Abilities
+    // 5. Normalize Abilities
     const abilities = data.abilities.map((a) => ({
       name: a.ability.name,
       isHidden: a.is_hidden,
       slot: a.slot,
     }));
 
-    // 5. Categorize Moves by Learn Method
+    // 6. Categorize Moves by Learn Method
     const moves = {
       levelUp: [],
       machine: [],
@@ -378,7 +427,7 @@ export const getPokemonDetails = async (nameOrId) => {
     // Sort level-up moves by level
     moves.levelUp.sort((a, b) => a.levelLearned - b.levelLearned);
 
-    // 6. Return structured data
+    // 7. Return structured data
     return {
       id: data.id,
       name: data.name,
@@ -394,6 +443,7 @@ export const getPokemonDetails = async (nameOrId) => {
       bst,
       abilities,
       moves,
+      evolutionChain,
       // Species / Breeding / Extra Info
       species: {
         eggGroups: speciesData.egg_groups.map((e) => e.name),

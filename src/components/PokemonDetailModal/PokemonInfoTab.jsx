@@ -3,7 +3,7 @@ import React from "react";
 export default function PokemonInfoTab({ details }) {
   if (!details) return null;
 
-  const { stats, bst, abilities, sprites } = details;
+  const { stats, bst, abilities, sprites, evolutionChain } = details;
 
   // Helper for Stat Colors & Max Value Ratios
   const getStatBarColor = (val) => {
@@ -35,7 +35,7 @@ export default function PokemonInfoTab({ details }) {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 bg-bg-muted/40 p-4 rounded-2xl border border-border-main/50">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 bg-bg-surface/80 p-4 rounded-2xl border border-border-main/60 shadow-xs">
           {statList.map(({ label, key, max }) => {
             const val = stats?.[key] || 0;
             const percent = Math.min(Math.round((val / max) * 100), 100);
@@ -48,7 +48,7 @@ export default function PokemonInfoTab({ details }) {
                 <span className="w-8 text-xs font-black text-text-main text-right shrink-0">
                   {val}
                 </span>
-                <div className="flex-1 h-2 bg-border-main/40 rounded-full overflow-hidden">
+                <div className="flex-1 h-2 bg-black/10 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${getStatBarColor(val)}`}
                     style={{ width: `${percent}%` }}
@@ -69,13 +69,13 @@ export default function PokemonInfoTab({ details }) {
           {abilities?.map((ability) => (
             <div
               key={ability.name}
-              className="flex items-center justify-between p-3.5 rounded-xl border border-border-main bg-bg-surface shadow-2xs"
+              className="flex items-center justify-between p-3.5 rounded-xl border border-border-main/60 bg-bg-surface/90 shadow-xs"
             >
               <span className="text-sm font-bold text-text-main capitalize">
                 {ability.name.replaceAll("-", " ")}
               </span>
               {ability.isHidden && (
-                <span className="text-[10px] font-black text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider border border-amber-500/20">
+                <span className="text-[10px] font-black text-amber-600 bg-amber-500/15 px-2 py-0.5 rounded-full uppercase tracking-wider border border-amber-500/30">
                   Hidden
                 </span>
               )}
@@ -84,13 +84,54 @@ export default function PokemonInfoTab({ details }) {
         </div>
       </div>
 
-      {/* 3. Normal vs. Shiny Sprites */}
+      {/* 3. Evolution Line Section */}
+      {evolutionChain && evolutionChain.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <h3 className="text-xs font-black uppercase tracking-wider text-text-subtle">
+            Evolution Line
+          </h3>
+          <div className="flex flex-row items-center justify-around gap-3 lg:gap-4 p-1 lg:p-5 rounded-2xl border border-border-main/60 bg-bg-surface/80 shadow-xs">
+            {evolutionChain.map((evo, idx) => (
+              <React.Fragment key={evo.name}>
+                <div className="flex flex-col items-center gap-2 group cursor-pointer">
+                  <div className="w-20 h-20 rounded-2xl p-2 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <img
+                      src={evo.sprite}
+                      alt={evo.name}
+                      className="w-full h-full object-contain drop-shadow-sm"
+                    />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs font-black text-text-main capitalize">
+                      {evo.name.replaceAll("-", " ")}
+                    </p>
+                    {evo.minLevel && (
+                      <span className="text-[10px] font-bold text-text-subtle">
+                        Lv. {evo.minLevel}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Arrow connector between stages */}
+                {idx < evolutionChain.length - 1 && (
+                  <div className="text-text-subtle/60 text-sm lg:text-3xl font-bold">
+                    →
+                  </div>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 4. Normal vs. Shiny Artwork Showcase */}
       <div className="flex flex-col gap-3">
         <h3 className="text-xs font-black uppercase tracking-wider text-text-subtle">
           Artwork Showcase
         </h3>
         <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-border-main/50 bg-bg-muted/30 gap-2">
+          <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-border-main/60 bg-bg-surface/80 gap-2 shadow-xs">
             <span className="text-xs font-bold text-text-subtle">Normal</span>
             <img
               src={sprites?.normal}
@@ -98,7 +139,7 @@ export default function PokemonInfoTab({ details }) {
               className="w-32 h-32 object-contain drop-shadow-md hover:scale-105 transition-transform"
             />
           </div>
-          <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-border-main/50 bg-bg-muted/30 gap-2">
+          <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-border-main/60 bg-bg-surface/80 gap-2 shadow-xs">
             <span className="text-xs font-bold text-amber-500">✨ Shiny</span>
             <img
               src={sprites?.shiny}
