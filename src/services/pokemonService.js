@@ -358,6 +358,31 @@ const parseEvolutionChain = async (chainNode) => {
 };
 
 /**
+ * Helper to batch-fetch move details (type, damage class, power, accuracy, pp)
+ */
+const fetchMoveDetailsBatch = async (moveList) => {
+  return Promise.all(
+    moveList.map(async (m) => {
+      try {
+        const res = await fetch(`https://pokeapi.co/api/v2/move/${m.name}`);
+        if (!res.ok) return { ...m, type: "normal", category: "physical", power: null, accuracy: null, pp: null };
+        const data = await res.json();
+        return {
+          ...m,
+          type: data.type?.name || "normal",
+          category: data.damage_class?.name || "physical", // "physical" | "special" | "status"
+          power: data.power,
+          accuracy: data.accuracy,
+          pp: data.pp,
+        };
+      } catch {
+        return { ...m, type: "normal", category: "physical", power: null, accuracy: null, pp: null };
+      }
+    })
+  );
+};
+
+/**
  * Fetches full details for a single Pokémon by name or ID
  */
 export const getPokemonDetails = async (nameOrId) => {
@@ -435,6 +460,14 @@ export const getPokemonDetails = async (nameOrId) => {
     // Sort level-up moves by level
     moves.levelUp.sort((a, b) => a.levelLearned - b.levelLearned);
 
+    // Batch-fetch Move Stats for all learn methods
+    const [levelUp, machine, egg, tutor] = await Promise.all([
+      fetchMoveDetailsBatch(moves.levelUp),
+      fetchMoveDetailsBatch(moves.machine),
+      fetchMoveDetailsBatch(moves.egg),
+      fetchMoveDetailsBatch(moves.tutor),
+    ]);
+
     // 7. Return structured data
     return {
       id: data.id,
@@ -451,7 +484,7 @@ export const getPokemonDetails = async (nameOrId) => {
       stats,
       bst,
       abilities,
-      moves,
+      moves: { levelUp, machine, egg, tutor },
       evolutionChain,
       // Species / Breeding / Extra Info
       species: {
