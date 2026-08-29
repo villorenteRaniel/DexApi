@@ -19,9 +19,7 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-1 min-w-0 pt-16 md:pl-20 lg:pl-64 min-h-screen">
         <Routes>
-          {/* Default redirect to pokedex for now */}
-          <Route path="/" element={<Navigate to="/pokedex" replace />} />
-          <Route path="/pokedex" element={<Pokedex />} />
+          <Route path="/" element={<Pokedex />} />
           <Route path="/ability" element={<Ability />} />
           <Route path="/move" element={<Move />} />
           <Route path="/type" element={<Type />} />
