@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
@@ -13,7 +12,9 @@ import ScrollToTop from './components/ScrollToTop';
 export default function App() {
   return (
     <div className="min-h-screen w-full relative flex bg-bg-main text-text-subtle font-sans antialiased">
+      {/* Sidebar navigation */}
       <Sidebar />
+      {/* Sticky Header */}
       <Header />
 
       {/* Main Content Area */}
